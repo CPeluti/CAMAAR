@@ -1,7 +1,8 @@
 import ImportPage from '../../../src/pages/ImportPage.vue'
+import { Notify } from 'quasar'
 import { mount } from '@vue/test-utils';
 import { installQuasarPlugin } from '@quasar/quasar-app-extension-testing-unit-jest'
-installQuasarPlugin();
+installQuasarPlugin({ plugins: {Notify}});
 
 const registeredRows = [
   { id: 1, nome: 'D', codigo: 'Dickerson', turma: 'Macdonald', semestre: '2020-1', horario: '2T' },

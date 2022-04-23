@@ -1,7 +1,8 @@
 import ImportCard from '../../../src/components/ImportCard.vue'
 import { mount } from '@vue/test-utils';
+import { Notify } from 'quasar'
 import { installQuasarPlugin } from '@quasar/quasar-app-extension-testing-unit-jest'
-installQuasarPlugin();
+installQuasarPlugin({ plugins: {Notify}});
 
 const registeredRows = [
   { nome: 'D', codigo: 'Dickerson', turma: 'Macdonald', semestre: '2020-1', horario: '2T' },
@@ -21,11 +22,10 @@ const $axios = {
   get: (url) => {
     return {data: {rows: registeredRows}}
   },
-  post: (url) => {
+  post: jest.fn(url => {
     return {data: {rows: registeredRows}}
-  }
+  })
 }
-const notify = jest.fn()
 
 describe('Import Page Tests', () => {
   beforeEach(() => {
@@ -117,18 +117,33 @@ describe('Import Page Tests', () => {
       expect(valores.includes(cell.text())).toBe(true)
     })
   })
-  //TODO: Implementar testes que usam o $q.notify
-  // it('Emite alerta ao clicar no botao de importar sem Selecionar uma turma"', async ()=> {
-  //   const wrapper = mount(ImportCard, {
-  //     global: {
-  //       mocks: {
-  //         $axios
-  //       }
-  //     }
-  //   })
-  //   const button = wrapper.find('#importButton')
-  //   console.log(button)
-  //   await button.trigger('click')
-  //   expect(true).toBe(true)
-  // })
+  it('Não realiza a request ao clicar no botao de importar sem Selecionar uma turma"', async ()=> {
+    const wrapper = mount(ImportCard, {
+      global: {
+        mocks: {
+          $axios
+        }
+      }
+    })
+    const button = wrapper.find('#importButton')
+    await button.trigger('click')
+    await wrapper.vm.$nextTick
+    expect($axios.post.mock.calls.length).toBe(0)
+  })
+  it('realiza a request ao clicar no botao de importar com uma turma selecionada"', async ()=> {
+    const wrapper = mount(ImportCard, {
+      global: {
+        mocks: {
+          $axios
+        }
+      }
+    })
+    const checkBox = wrapper.findAll('input[type="checkbox"]')[1]
+    await checkBox.trigger('click')
+    await wrapper.vm.$nextTick()
+    const button = wrapper.find('#importButton')
+    await button.trigger('click')
+    await wrapper.vm.$nextTick
+    expect($axios.post.mock.calls.length).toBe(1)
+  })
 })
